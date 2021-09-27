@@ -7,7 +7,7 @@
 
 using namespace std::literals::chrono_literals;
 
-std::condition_variable_any2 cv;
+josuttis::condition_variable_any2 cv;
 std::mutex mut;
 int sharedStateA = 0;
 int sharedStateB = 0;

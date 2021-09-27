@@ -43,7 +43,7 @@ void interruptByDestructor()
   bool t1WasInterrupted = false;
   {
    std::cout << "\n- start jthread t1" << std::endl;
-   std::jthread t1([interval, &t1WasInterrupted] (std::stop_token stoken) {
+   josuttis::jthread t1([interval, &t1WasInterrupted] (josuttis::stop_token stoken) {
                      printID("t1 STARTED with interval " + asString(interval) + " with id");
                      assert(!stoken.stop_requested());
                      try {
@@ -91,7 +91,7 @@ void interruptStartedThread()
   {
    std::cout << "\n- start jthread t1" << std::endl;
    bool interrupted = false;
-   std::jthread t1([interval, &interrupted] (std::stop_token stoken) {
+   josuttis::jthread t1([interval, &interrupted] (josuttis::stop_token stoken) {
                      printID("t1 STARTED with interval " + asString(interval) + " with id");
                      try {
                        // loop until interrupted (at most 40 times the interval)
@@ -130,9 +130,9 @@ void interruptStartedThreadWithSubthread()
   auto interval = 0.2s;
   {
    std::cout << "\n- start jthread t1 with nested jthread t2" << std::endl;
-   std::jthread t1([interval] (std::stop_token stoken) {
+   josuttis::jthread t1([interval] (josuttis::stop_token stoken) {
                      printID("t1 STARTED with id");
-                     std::jthread t2([interval, stoken] {
+                     josuttis::jthread t2([interval, stoken] {
                                        printID("t2 STARTED with id");
                                        while(!stoken.stop_requested()) {
                                          std::cout.put('2').flush();
@@ -168,12 +168,12 @@ void foo(const std::string& msg)
 void basicAPIWithFunc()
 {
   std::cout << "\n*** start basicAPIWithFunc(): " << std::endl;
-  std::stop_source is;
+  josuttis::stop_source is;
   assert(is.stop_possible());
   assert(!is.stop_requested());
   {
     std::cout << "\n- start jthread t1" << std::endl;
-    std::jthread t(&foo, "foo() called in thread with id: ");
+    josuttis::jthread t(&foo, "foo() called in thread with id: ");
     is = t.get_stop_source();
     std::cout << is.stop_requested() << std::endl;
     assert(is.stop_possible());
@@ -199,8 +199,8 @@ void testExchangeToken()
   // - started thread    
   {
     std::cout << "\n- start jthread t1" << std::endl;
-    std::atomic<std::stop_token*> itPtr = nullptr;
-    std::jthread t1([&itPtr](std::stop_token sToken){
+    std::atomic<josuttis::stop_token*> itPtr = nullptr;
+    josuttis::jthread t1([&itPtr](josuttis::stop_token sToken){
                       printID("t1 STARTED (id: ", ") printing . or - or i");
 		      auto actToken = sToken;
                       int numInterrupts = 0;
@@ -241,13 +241,13 @@ void testExchangeToken()
 
    std::this_thread::sleep_for(interval);
    std::cout << "\n- replace by invalid/unstoppable token" << std::endl;
-   std::stop_token it;
+   josuttis::stop_token it;
    itPtr.store(&it);
 
    std::this_thread::sleep_for(interval);
    std::cout << "\n- replace by valid/stoppable token" << std::endl;
-   auto isTmp = std::stop_source{};
-   it = std::stop_token{isTmp.get_token()};
+   auto isTmp = josuttis::stop_source{};
+   it = josuttis::stop_token{isTmp.get_token()};
    itPtr.store(&it);
 
    std::this_thread::sleep_for(interval);
@@ -266,11 +266,11 @@ void testConcurrentInterrupt()
 {
   std::cout << "\n*** start testConcurrentInterrupt()" << std::endl;
   int numThreads = 30;
-  std::stop_source is;
+  josuttis::stop_source is;
   {
     std::atomic<int> numInterrupts{0};
     std::cout << "\n- start jthread t1" << std::endl;
-    std::jthread t1([it=is.get_token()](std::stop_token stoken){
+    josuttis::jthread t1([it=is.get_token()](josuttis::stop_token stoken){
               printID("t1 STARTED (id: ", ") printing . or - or i");
               try {
                 char c = ' ';
@@ -301,11 +301,11 @@ void testConcurrentInterrupt()
 
    // starts thread concurrently calling request_stop() for the same token:
    std::cout << "\n- loop over " << numThreads << " threads that request_stop() concurrently" << std::endl;
-   std::vector<std::jthread> tv;
+   std::vector<josuttis::jthread> tv;
    int requestStopNumTrue = 0;
    for (int i = 0; i < numThreads; ++i) {
        std::this_thread::sleep_for(0.1ms);
-       std::jthread t([&t1, &requestStopNumTrue] {
+       josuttis::jthread t([&t1, &requestStopNumTrue] {
                         printID("- interrupting thread started with id:");
                         for (int i = 0; i < 13; ++i) {
                           std::cout.put('x').flush();
@@ -337,7 +337,7 @@ void testJthreadMove()
   std::cout << "\n*** start testJthreadMove()" << std::endl;
   {
     bool interruptSignaled = false;
-    std::jthread t1{[&interruptSignaled] (std::stop_token st) {
+    josuttis::jthread t1{[&interruptSignaled] (josuttis::stop_token st) {
                       while (!st.stop_requested()) {
                         std::this_thread::sleep_for(0.1s);
                       }
@@ -345,14 +345,14 @@ void testJthreadMove()
                         interruptSignaled = true;
                       }
                     }};
-    std::jthread t2{std::move(t1)};  // should compile
+    josuttis::jthread t2{std::move(t1)};  // should compile
 
     auto ssource = t1.get_stop_source();
     assert(!ssource.stop_possible());
     assert(!ssource.stop_requested());
-    //assert(ssource == std::stop_source{}); 
+    //assert(ssource == josuttis::stop_source{}); 
     ssource = t2.get_stop_source();
-    assert(ssource != std::stop_source{}); 
+    assert(ssource != josuttis::stop_source{}); 
     assert(ssource.stop_possible());
     assert(!ssource.stop_requested());
 
@@ -372,8 +372,8 @@ void testEnabledIfForCopyConstructor_CompileTimeOnly()
 {
   std::cout << "\n*** start testEnableIfForCopyConstructor_CompileTimeOnly()" << std::endl;
   {
-    std::jthread t1;
-    //std::jthread t2{t1};  // should not compile
+    josuttis::jthread t1;
+    //josuttis::jthread t2{t1};  // should not compile
   }
   std::cout << "\n*** OK" << std::endl;
 }

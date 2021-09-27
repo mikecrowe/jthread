@@ -13,13 +13,13 @@ void testJThreadWithout()
   // test the basic jthread API (not taking stop_token arg)
   std::cout << "*** start testJThreadWithout()" << std::endl;
 
-  assert(std::jthread::hardware_concurrency() == std::thread::hardware_concurrency()); 
-  std::stop_token stoken;
+  assert(josuttis::jthread::hardware_concurrency() == std::thread::hardware_concurrency()); 
+  josuttis::stop_token stoken;
   assert(!stoken.stop_possible());
   {
-    std::jthread::id t1ID{std::this_thread::get_id()};
+    josuttis::jthread::id t1ID{std::this_thread::get_id()};
     std::atomic<bool> t1AllSet{false};
-    std::jthread t1([&t1ID, &t1AllSet] {  // NOTE: no stop_token passed
+    josuttis::jthread t1([&t1ID, &t1AllSet] {  // NOTE: no stop_token passed
                    // check some values of the started thread:
                    t1ID = std::this_thread::get_id();
                    t1AllSet.store(true);
@@ -52,15 +52,15 @@ void testThreadWithToken()
   // test the basic thread API (taking stop_token arg)
   std::cout << "*** start testThreadWithToken()" << std::endl;
 
-  std::stop_source ssource;
-  std::stop_source origsource;
+  josuttis::stop_source ssource;
+  josuttis::stop_source origsource;
   assert(ssource.stop_possible());
   assert(!ssource.stop_requested());
   {
-    std::jthread::id t1ID{std::this_thread::get_id()};
+    josuttis::jthread::id t1ID{std::this_thread::get_id()};
     std::atomic<bool> t1AllSet{false};
     std::atomic<bool> t1done{false};
-    std::jthread t1([&t1ID, &t1AllSet, &t1done] (std::stop_token st) {
+    josuttis::jthread t1([&t1ID, &t1AllSet, &t1done] (josuttis::stop_token st) {
                        // check some values of the started thread:
                        t1ID = std::this_thread::get_id();
                        t1AllSet.store(true);
@@ -109,10 +109,10 @@ void testJoin()
   // test jthread join()
   std::cout << "\n*** start testJoin()" << std::endl;
 
-  std::stop_source ssource;
+  josuttis::stop_source ssource;
   assert(ssource.stop_possible());
   {
-    std::jthread t1([](std::stop_token stoken) {
+    josuttis::jthread t1([](josuttis::stop_token stoken) {
                       // wait until interrupt is signaled (due to calling request_stop() for the token):
                       for (int i=0; !stoken.stop_requested(); ++i) {
                          std::this_thread::sleep_for(100ms);
@@ -122,7 +122,7 @@ void testJoin()
                  });
     ssource = t1.get_stop_source();
     // let nother thread signal cancellation after some time:
-    std::jthread t2([ssource] () mutable {
+    josuttis::jthread t2([ssource] () mutable {
                      for (int i=0; i < 10; ++i) {
                        std::this_thread::sleep_for(70ms);
                        std::cout.put('x').flush();
@@ -148,17 +148,17 @@ void testDetach()
   // test jthread detach()
   std::cout << "\n*** start testDetach()" << std::endl;
 
-  std::stop_source ssource;
+  josuttis::stop_source ssource;
   assert(ssource.stop_possible());
   std::atomic<bool> t1FinallyInterrupted{false};
   {
-    std::jthread t0;
-    std::jthread::id t1ID{std::this_thread::get_id()};
+    josuttis::jthread t0;
+    josuttis::jthread::id t1ID{std::this_thread::get_id()};
     bool t1IsInterrupted;
-    std::stop_token t1InterruptToken;
+    josuttis::stop_token t1InterruptToken;
     std::atomic<bool> t1AllSet{false};
-    std::jthread t1([&t1ID, &t1IsInterrupted, &t1InterruptToken, &t1AllSet, &t1FinallyInterrupted]
-                    (std::stop_token stoken) {
+    josuttis::jthread t1([&t1ID, &t1IsInterrupted, &t1InterruptToken, &t1AllSet, &t1FinallyInterrupted]
+                    (josuttis::stop_token stoken) {
                    // check some values of the started thread:
                    t1ID = std::this_thread::get_id();
                    t1InterruptToken = stoken;
@@ -181,7 +181,7 @@ void testDetach()
     }
     // and check all values:
     assert(!t0.joinable());
-    //assert(std::stop_source{} == t0.get_stop_source());
+    //assert(josuttis::stop_source{} == t0.get_stop_source());
     assert(t1.joinable());
     assert(t1ID == t1.get_id());
     assert(t1IsInterrupted == false);
@@ -214,9 +214,9 @@ void testAssign()
   // test jthread operator=()
   std::cout << "\n*** start testAssign()" << std::endl;
 
-  std::stop_token stoken;
+  josuttis::stop_token stoken;
   {
-    std::jthread t1([](std::stop_token stoken) {
+    josuttis::jthread t1([](josuttis::stop_token stoken) {
                       // wait until interrupt is signaled (due to calling request_stop() for the token):
                       for (int i=0; !stoken.stop_requested(); ++i) {
                          std::this_thread::sleep_for(100ms);
@@ -228,7 +228,7 @@ void testAssign()
     assert(!stoken.stop_requested());
     assert(t1.joinable());
     // t1 is stopped and joined before being assigned:
-    t1 = std::jthread();
+    t1 = josuttis::jthread();
     assert(stoken.stop_requested());
     assert(!t1.joinable());
   }
@@ -244,7 +244,7 @@ void testStdThread()
   std::thread t0;
   std::thread::id t1ID{std::this_thread::get_id()};
   std::atomic<bool> t1AllSet{false};
-  std::stop_source t1ShallDie;
+  josuttis::stop_source t1ShallDie;
   std::thread t1([&t1ID, &t1AllSet, t1ShallDie = t1ShallDie.get_token()] {
                    // check some supplementary values of the started thread:
                    t1ID = std::this_thread::get_id();
@@ -294,9 +294,9 @@ void testTemporarilyDisableToken()
 
   enum class State { init, loop, disabled, restored, interrupted };
   std::atomic<State> state{State::init};
-  std::stop_source t1is;
+  josuttis::stop_source t1is;
   {
-    std::jthread t1([&state] (std::stop_token stoken) {
+    josuttis::jthread t1([&state] (josuttis::stop_token stoken) {
                    std::cout << "- start t1" << std::endl;
                    auto actToken = stoken;
                    // just loop (no interrupt should occur):
@@ -314,8 +314,8 @@ void testTemporarilyDisableToken()
                      assert(false);
                    }
                    // temporarily disable interrupts:
-                   std::stop_token interruptDisabled;
-                   swap(stoken, interruptDisabled);
+                   josuttis::stop_token interruptDisabled;
+                   std::swap(stoken, interruptDisabled);
                    state.store(State::disabled); 
                    // loop again until interrupt signaled to original interrupt token:
                    try {
@@ -336,7 +336,7 @@ void testTemporarilyDisableToken()
                    }
                    state.store(State::restored); 
                    // enable interrupts again:
-                   swap(stoken, interruptDisabled);
+                   std::swap(stoken, interruptDisabled);
                    // loop again (should immediately throw):
                    assert(!interruptDisabled.stop_requested());
                    try {
@@ -371,28 +371,28 @@ void testJThreadAPI()
   // test the basic jthread API (taking stop_token arg)
   std::cout << "*** start testJThreadAPI()" << std::endl;
 
-  assert(std::jthread::hardware_concurrency() == std::thread::hardware_concurrency()); 
-  std::stop_source ssource;
+  assert(josuttis::jthread::hardware_concurrency() == std::thread::hardware_concurrency()); 
+  josuttis::stop_source ssource;
   assert(ssource.stop_possible());
   assert(ssource.get_token().stop_possible());
-  std::stop_token stoken;
+  josuttis::stop_token stoken;
   assert(!stoken.stop_possible());
 
   // thread with no callable and invalid source:
-  std::jthread t0;
-  std::jthread::native_handle_type nh = t0.native_handle();
+  josuttis::jthread t0;
+  josuttis::jthread::native_handle_type nh = t0.native_handle();
   assert((std::is_same_v<decltype(nh), std::thread::native_handle_type>)); 
   assert(!t0.joinable());
-  std::stop_source ssourceStolen{std::move(ssource)};
+  josuttis::stop_source ssourceStolen{std::move(ssource)};
   assert(!ssource.stop_possible());
   assert(ssource == t0.get_stop_source());
   assert(ssource.get_token() == t0.get_stop_token());
 
   {
-    std::jthread::id t1ID{std::this_thread::get_id()};
-    std::stop_token t1InterruptToken;
+    josuttis::jthread::id t1ID{std::this_thread::get_id()};
+    josuttis::stop_token t1InterruptToken;
     std::atomic<bool> t1AllSet{false};
-    std::jthread t1([&t1ID, &t1InterruptToken, &t1AllSet] (std::stop_token stoken) {
+    josuttis::jthread t1([&t1ID, &t1InterruptToken, &t1AllSet] (josuttis::stop_token stoken) {
                    // check some values of the started thread:
                    t1ID = std::this_thread::get_id();
                    t1InterruptToken = stoken;
@@ -423,8 +423,8 @@ void testJThreadAPI()
     // test swap():
     std::swap(t0, t1);
     assert(!t1.joinable());
-    assert(std::stop_token{} == t1.get_stop_source().get_token());
-    assert(std::stop_token{} == t1.get_stop_token());
+    assert(josuttis::stop_token{} == t1.get_stop_source().get_token());
+    assert(josuttis::stop_token{} == t1.get_stop_token());
     assert(t0.joinable());
     assert(t1ID == t0.get_id());
     assert(t1InterruptToken == t0.get_stop_source().get_token());
@@ -434,8 +434,8 @@ void testJThreadAPI()
     t0 = std::move(t1);
     t1 = std::move(ttmp);
     assert(!t0.joinable());
-    assert(std::stop_token{} == t0.get_stop_source().get_token());
-    assert(std::stop_token{} == t0.get_stop_token());
+    assert(josuttis::stop_token{} == t0.get_stop_source().get_token());
+    assert(josuttis::stop_token{} == t0.get_stop_token());
     assert(t1.joinable());
     assert(t1ID == t1.get_id());
     assert(t1InterruptToken == t1.get_stop_source().get_token());

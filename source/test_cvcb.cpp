@@ -20,13 +20,13 @@ void testCVCallback()
 
   bool ready{false};
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
 
   bool cbCalled{false};
   {
-    std::jthread t1{[&] (std::stop_token stoken) {
+    josuttis::jthread t1{[&] (josuttis::stop_token stoken) {
                        std::cout << "\nt1 started" << std::endl;
-                       std::stop_callback cb(stoken,
+                       josuttis::stop_callback cb(stoken,
                                              [&] {
                                                std::cout << "\nt1 cb called (1sec)" << std::endl;
                                                std::this_thread::sleep_for(1s);

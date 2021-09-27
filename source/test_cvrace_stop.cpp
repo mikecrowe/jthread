@@ -11,10 +11,10 @@
 #include <cstring>
 using namespace::std::literals;
 
-std::condition_variable_any2* cv = nullptr;
+josuttis::condition_variable_any2* cv = nullptr;
 std::mutex m;
-std::stop_source ss;
-std::stop_token st=ss.get_token();
+josuttis::stop_source ss;
+josuttis::stop_token st=ss.get_token();
 
 bool done = false;
 bool waiting=false;
@@ -28,7 +28,7 @@ std::condition_variable deleter_cv;
 //  is required to be supported.
 //  It comes from POSIX.
 //  See the man page for pthread_cond_destroy for an example that does exactly this,
-//  and the notes in the description of the destructors for std::condition_variable and std::condition_variable_any.
+//  and the notes in the description of the destructors for std::condition_variable and josuttis::condition_variable_any2.
 //-------------------------
 
 void deleter_thread() {
@@ -44,8 +44,8 @@ void deleter_thread() {
 void testCVAnyMutex() 
 {
   std::cout << "*** start testCVAnyMUtex() ORIG" << std::endl;
-    void* raw=malloc(sizeof(std::condition_variable_any2));
-    cv = new(raw) std::condition_variable_any2;
+    void* raw=malloc(sizeof(josuttis::condition_variable_any2));
+    cv = new(raw) josuttis::condition_variable_any2;
     std::thread th(deleter_thread);
     m.lock();
     waiting=true;

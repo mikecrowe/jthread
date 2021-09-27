@@ -19,7 +19,7 @@
 
 TEST(DefaultTokenIsNotStoppable)
 {
-  std::stop_token t;
+  josuttis::stop_token t;
   CHECK(!t.stop_requested());
   CHECK(!t.stop_possible());
 }
@@ -29,8 +29,8 @@ TEST(DefaultTokenIsNotStoppable)
 
 TEST(RequestingStopOnSourceUpdatesToken)
 {
-  std::stop_source s;
-  std::stop_token t = s.get_token();
+  josuttis::stop_source s;
+  josuttis::stop_token t = s.get_token();
   CHECK(t.stop_possible());
   CHECK(!t.stop_requested());
   s.request_stop();
@@ -43,9 +43,9 @@ TEST(RequestingStopOnSourceUpdatesToken)
 
 TEST(TokenCantBeStoppedWhenNoMoreSources)
 {
-  std::stop_token t;
+  josuttis::stop_token t;
   {
-    std::stop_source s;
+    josuttis::stop_source s;
     t = s.get_token();
     CHECK(t.stop_possible());
   }
@@ -58,9 +58,9 @@ TEST(TokenCantBeStoppedWhenNoMoreSources)
 
 TEST(TokenCanBeStoppedWhenNoMoreSourcesIfStopAlreadyRequested)
 {
-  std::stop_token t;
+  josuttis::stop_token t;
   {
-    std::stop_source s;
+    josuttis::stop_source s;
     t = s.get_token();
     CHECK(t.stop_possible());
     s.request_stop();
@@ -75,11 +75,11 @@ TEST(TokenCanBeStoppedWhenNoMoreSourcesIfStopAlreadyRequested)
 
 TEST(CallbackNotExecutedImmediatelyIfStopNotYetRequested)
 {
-  std::stop_source s;
+  josuttis::stop_source s;
 
   bool callbackExecuted = false;
   {
-    std::stop_callback cb(s.get_token(), [&] { callbackExecuted = true; });
+    josuttis::stop_callback cb(s.get_token(), [&] { callbackExecuted = true; });
   }
 
   CHECK(!callbackExecuted);
@@ -94,9 +94,9 @@ TEST(CallbackNotExecutedImmediatelyIfStopNotYetRequested)
 
 TEST(CallbackExecutedIfStopRequestedBeforeDestruction)
 {
-  std::stop_source s;
+  josuttis::stop_source s;
   bool callbackExecuted = false;
-  std::stop_callback cb(
+  josuttis::stop_callback cb(
     s.get_token(),
     [&] { callbackExecuted = true; });
 
@@ -112,11 +112,11 @@ TEST(CallbackExecutedIfStopRequestedBeforeDestruction)
 
 TEST(CallbackExecutedImmediatelyIfStopAlreadyRequested)
 {
-  std::stop_source s;
+  josuttis::stop_source s;
   s.request_stop();
 
   bool executed = false;
-  std::stop_callback r{ s.get_token(), [&] { executed = true; } };
+  josuttis::stop_callback r{ s.get_token(), [&] { executed = true; } };
   CHECK(executed);
 }
 
@@ -125,22 +125,22 @@ TEST(CallbackExecutedImmediatelyIfStopAlreadyRequested)
 
 TEST(RegisterMultipleCallbacks)
 {
-  std::stop_source s;
+  josuttis::stop_source s;
   auto t = s.get_token();
 
   int callbackExecutionCount = 0;
   auto callback = [&] { ++callbackExecutionCount; };
 
-  std::stop_callback r1{ t, callback };
-  std::stop_callback r2{ t, callback };
-  std::stop_callback r3{ t, callback };
-  std::stop_callback r4{ t, callback };
-  std::stop_callback r5{ t, callback };
-  std::stop_callback r6{ t, callback };
-  std::stop_callback r7{ t, callback };
-  std::stop_callback r8{ t, callback };
-  std::stop_callback r9{ t, callback };
-  std::stop_callback r10{ t, callback };
+  josuttis::stop_callback r1{ t, callback };
+  josuttis::stop_callback r2{ t, callback };
+  josuttis::stop_callback r3{ t, callback };
+  josuttis::stop_callback r4{ t, callback };
+  josuttis::stop_callback r5{ t, callback };
+  josuttis::stop_callback r6{ t, callback };
+  josuttis::stop_callback r7{ t, callback };
+  josuttis::stop_callback r8{ t, callback };
+  josuttis::stop_callback r9{ t, callback };
+  josuttis::stop_callback r10{ t, callback };
 
   s.request_stop();
 
@@ -152,33 +152,33 @@ TEST(RegisterMultipleCallbacks)
 
 TEST(ConcurrentCallbackRegistration)
 {
-  auto threadLoop = [](std::stop_token token)
+  auto threadLoop = [](josuttis::stop_token token)
   {
     std::atomic<bool> cancelled = false;
     while (!cancelled)
     {
-      std::stop_callback registration{ token, [&]
+      josuttis::stop_callback registration{ token, [&]
       {
         cancelled = true;
       } };
 
-      std::stop_callback cb0{ token, [] {} };
-      std::stop_callback cb1{ token, [] {} };
-      std::stop_callback cb2{ token, [] {} };
-      std::stop_callback cb3{ token, [] {} };
-      std::stop_callback cb4{ token, [] {} };
-      std::stop_callback cb5{ token, [] {} };
-      std::stop_callback cb6{ token, [] {} };
-      std::stop_callback cb7{ token, [] {} };
-      std::stop_callback cb8{ token, [] {} };
-      std::stop_callback cb9{ token, [] {} };
-      std::stop_callback cb10{ token, [] {} };
-      std::stop_callback cb11{ token, [] {} };
-      std::stop_callback cb12{ token, [] {} };
-      std::stop_callback cb13{ token, [] {} };
-      std::stop_callback cb14{ token, [] {} };
-      std::stop_callback cb15{ token, [] {} };
-      std::stop_callback cb16{ token, [] {} };
+      josuttis::stop_callback cb0{ token, [] {} };
+      josuttis::stop_callback cb1{ token, [] {} };
+      josuttis::stop_callback cb2{ token, [] {} };
+      josuttis::stop_callback cb3{ token, [] {} };
+      josuttis::stop_callback cb4{ token, [] {} };
+      josuttis::stop_callback cb5{ token, [] {} };
+      josuttis::stop_callback cb6{ token, [] {} };
+      josuttis::stop_callback cb7{ token, [] {} };
+      josuttis::stop_callback cb8{ token, [] {} };
+      josuttis::stop_callback cb9{ token, [] {} };
+      josuttis::stop_callback cb10{ token, [] {} };
+      josuttis::stop_callback cb11{ token, [] {} };
+      josuttis::stop_callback cb12{ token, [] {} };
+      josuttis::stop_callback cb13{ token, [] {} };
+      josuttis::stop_callback cb14{ token, [] {} };
+      josuttis::stop_callback cb15{ token, [] {} };
+      josuttis::stop_callback cb16{ token, [] {} };
 
       std::this_thread::yield();
     }
@@ -187,7 +187,7 @@ TEST(ConcurrentCallbackRegistration)
   // Just assert this runs and terminates without crashing.
   for (int i = 0; i < 100; ++i)
   {
-    std::stop_source source;
+    josuttis::stop_source source;
 
     std::thread waiter1{ threadLoop, source.get_token() };
     std::thread waiter2{ threadLoop, source.get_token() };
@@ -212,8 +212,8 @@ TEST(ConcurrentCallbackRegistration)
 
 TEST(CallbackDeregisteredFromWithinCallbackDoesNotDeadlock)
 {
-  std::stop_source src;
-  std::optional<std::stop_callback<std::function<void()>>> cb;
+  josuttis::stop_source src;
+  std::optional<josuttis::stop_callback<std::function<void()>>> cb;
 
   cb.emplace(src.get_token(), [&] {
     cb.reset();
@@ -229,7 +229,7 @@ TEST(CallbackDeregisteredFromWithinCallbackDoesNotDeadlock)
 
 TEST(CallbackDeregistrationDoesNotWaitForOtherCallbacksToFinishExecuting)
 {
-  std::stop_source src;
+  josuttis::stop_source src;
 
   std::mutex mut;
   std::condition_variable cv;
@@ -239,18 +239,18 @@ TEST(CallbackDeregistrationDoesNotWaitForOtherCallbacksToFinishExecuting)
 
   auto dummyCallback = []{};
 
-  std::optional<std::stop_callback<decltype(dummyCallback)&>> cb1{std::in_place, src.get_token(), dummyCallback};
+  std::optional<josuttis::stop_callback<decltype(dummyCallback)&>> cb1{std::in_place, src.get_token(), dummyCallback};
 
   // Register a first callback that will signal when it starts executing
   // and then block until it receives a signal.
-  std::stop_callback blockingCb{ src.get_token(), [&] {
+  josuttis::stop_callback blockingCb{ src.get_token(), [&] {
     std::unique_lock lock{mut};
     callbackExecuting = true;
     cv.notify_all();
     cv.wait(lock, [&] { return releaseCallback; });
   } };
 
-  std::optional<std::stop_callback<decltype(dummyCallback)&>> cb2{std::in_place, src.get_token(), dummyCallback};
+  std::optional<josuttis::stop_callback<decltype(dummyCallback)&>> cb2{std::in_place, src.get_token(), dummyCallback};
 
   std::thread signallingThread{ [&] { src.request_stop(); } };
 
@@ -281,7 +281,7 @@ TEST(CallbackDeregistrationDoesNotWaitForOtherCallbacksToFinishExecuting)
 
 TEST(CallbackDeregistrationBlocksUntilCallbackFinishes)
 {
-  std::stop_source src;
+  josuttis::stop_source src;
 
   std::mutex mut;
   std::condition_variable cv;
@@ -294,7 +294,7 @@ TEST(CallbackDeregistrationBlocksUntilCallbackFinishes)
     bool callbackDeregistered = false;
 
     {
-      std::stop_callback cb{ src.get_token(), [&] {
+      josuttis::stop_callback cb{ src.get_token(), [&] {
         std::unique_lock lock{mut};
         callbackExecuting = true;
         cv.notify_all();
@@ -339,9 +339,9 @@ TEST(CallbackDeregistrationBlocksUntilCallbackFinishes)
 template<typename CB>
 struct callback_batch
 {
-  using callback_t = std::stop_callback<CB&>;
+  using callback_t = josuttis::stop_callback<CB&>;
 
-  callback_batch(std::stop_token t, CB& callback)
+  callback_batch(josuttis::stop_token t, CB& callback)
    : r0(t, callback),
      r1(t, callback),
      r2(t, callback),
@@ -370,7 +370,7 @@ TEST(CancellationSingleThreadPerformance)
 {
   auto callback = []{};
 
-  std::stop_source s;
+  josuttis::stop_source s;
 
   constexpr int iterationCount = 100'000;
 
@@ -378,7 +378,7 @@ TEST(CancellationSingleThreadPerformance)
 
   for (int i = 0; i < iterationCount; ++i)
   {
-    std::stop_callback r{ s.get_token(), callback };
+    josuttis::stop_callback r{ s.get_token(), callback };
   }
 
   auto end = std::chrono::high_resolution_clock::now();

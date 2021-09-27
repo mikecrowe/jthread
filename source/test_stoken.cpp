@@ -9,12 +9,12 @@ void testStopTokenBasicAPI()
   std::cout << "\n============= testStopTokenBasicAPI()\n";
 
   // create stop_source
-  std::stop_source ssrc;
+  josuttis::stop_source ssrc;
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
 
   // create stop_token from stop_source
-  std::stop_token stok{ssrc.get_token()};
+  josuttis::stop_token stok{ssrc.get_token()};
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
   assert(stok.stop_possible());
@@ -26,7 +26,7 @@ void testStopTokenBasicAPI()
                cb1called = true;
              };
   {
-  std::stop_callback scb1{stok, cb1}; // copies cb1
+  josuttis::stop_callback scb1{stok, cb1}; // copies cb1
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
   assert(stok.stop_possible());
@@ -40,12 +40,12 @@ void testStopTokenBasicAPI()
                assert(stok.stop_requested());
                cb2called = true;
              };
-  //OK: std::stop_callback scb2{stok, cb2};
-  //OK: std::stop_callback<std::decay_t<decltype(cb2)>> scb2{stok, cb2};
-  //OK: std::stop_callback<decltype(cb2)&> scb2{stok, cb2};
+  //OK: josuttis::stop_callback scb2{stok, cb2};
+  //OK: josuttis::stop_callback<std::decay_t<decltype(cb2)>> scb2{stok, cb2};
+  //OK: josuttis::stop_callback<decltype(cb2)&> scb2{stok, cb2};
   //OK:
-  std::stop_callback<decltype(cb2)> scb2a{stok, cb2}; // copies cb2
-  std::stop_callback<decltype(cb2)> scb2b{stok, std::move(cb2)};
+  josuttis::stop_callback<decltype(cb2)> scb2a{stok, cb2}; // copies cb2
+  josuttis::stop_callback<decltype(cb2)> scb2b{stok, std::move(cb2)};
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
   assert(stok.stop_possible());
@@ -71,7 +71,7 @@ void testStopTokenBasicAPI()
   //auto cb3 = [&]{
   //             cb3called = true;
   //           };
-  std::stop_callback scb3{stok, 
+  josuttis::stop_callback scb3{stok, 
                           [&]{
                             cb3called = true;
                           }};
@@ -96,10 +96,10 @@ void testStopTokenAPI()
 
   // create, copy, assign and destroy:
   {
-    std::stop_source is1;
-    std::stop_source is2{is1};
-    std::stop_source is3 = is1;
-    std::stop_source is4{std::move(is1)};
+    josuttis::stop_source is1;
+    josuttis::stop_source is2{is1};
+    josuttis::stop_source is3 = is1;
+    josuttis::stop_source is4{std::move(is1)};
     assert(!is1.stop_possible());
     assert(is2.stop_possible());
     assert(is3.stop_possible());
@@ -116,7 +116,7 @@ void testStopTokenAPI()
     assert(!is2.stop_possible());
 
     // stop_source without shared stop state:
-    std::stop_source is0{std::nostopstate};
+    josuttis::stop_source is0{josuttis::nostopstate};
     assert(!is0.stop_requested());
     assert(!is0.stop_possible());
   }
@@ -125,10 +125,10 @@ void testStopTokenAPI()
 
   // create, copy, assign and destroy:
   {
-    std::stop_token it1;
-    std::stop_token it2{it1};
-    std::stop_token it3 = it1;
-    std::stop_token it4{std::move(it1)};
+    josuttis::stop_token it1;
+    josuttis::stop_token it2{it1};
+    josuttis::stop_token it3 = it1;
+    josuttis::stop_token it4{std::move(it1)};
     it1 = it2;
     it1 = std::move(it2);
     std::swap(it1,it2);
@@ -143,18 +143,18 @@ void testStopTokenAPI()
 
   // tokens without an source are no longer interruptible:
   {
-    std::stop_source* isp = new std::stop_source;
-    std::stop_source& isr = *isp;
-    std::stop_token it{isr.get_token()};
+    josuttis::stop_source* isp = new josuttis::stop_source;
+    josuttis::stop_source& isr = *isp;
+    josuttis::stop_token it{isr.get_token()};
     assert(isr.stop_possible());
     assert(it.stop_possible());
     delete isp;  // not interrupted and losing last source
     assert(!it.stop_possible());
   }
   {
-    std::stop_source* isp = new std::stop_source;
-    std::stop_source& isr = *isp;
-    std::stop_token it{isr.get_token()};
+    josuttis::stop_source* isp = new josuttis::stop_source;
+    josuttis::stop_source& isr = *isp;
+    josuttis::stop_token it{isr.get_token()};
     assert(isr.stop_possible());
     assert(it.stop_possible());
     isr.request_stop();
@@ -164,13 +164,13 @@ void testStopTokenAPI()
 
   //***** stop_possible(), stop_requested(), and request_stop():
   {
-    std::stop_source isNotValid;
-    std::stop_source isNotStopped{std::move(isNotValid)};
-    std::stop_source isStopped;
+    josuttis::stop_source isNotValid;
+    josuttis::stop_source isNotStopped{std::move(isNotValid)};
+    josuttis::stop_source isStopped;
     isStopped.request_stop();
-    std::stop_token itNotValid{isNotValid.get_token()};
-    std::stop_token itNotStopped{isNotStopped.get_token()};
-    std::stop_token itStopped{isStopped.get_token()};
+    josuttis::stop_token itNotValid{isNotValid.get_token()};
+    josuttis::stop_token itNotStopped{isNotStopped.get_token()};
+    josuttis::stop_token itStopped{isStopped.get_token()};
 
     // stop_possible() and stop_requested():
     assert(!isNotValid.stop_possible());
@@ -199,20 +199,20 @@ void testStopTokenAPI()
 
   //***** assignment and swap():
   {
-    std::stop_source isNotValid;
-    std::stop_source isNotStopped{std::move(isNotValid)};
-    std::stop_source isStopped;
+    josuttis::stop_source isNotValid;
+    josuttis::stop_source isNotStopped{std::move(isNotValid)};
+    josuttis::stop_source isStopped;
     isStopped.request_stop();
-    std::stop_token itNotValid{isNotValid.get_token()};
-    std::stop_token itNotStopped{isNotStopped.get_token()};
-    std::stop_token itStopped{isStopped.get_token()};
+    josuttis::stop_token itNotValid{isNotValid.get_token()};
+    josuttis::stop_token itNotStopped{isNotStopped.get_token()};
+    josuttis::stop_token itStopped{isStopped.get_token()};
 
     // assignments and swap():
-    assert(!std::stop_token{}.stop_requested());
-    itStopped = std::stop_token{};
+    assert(!josuttis::stop_token{}.stop_requested());
+    itStopped = josuttis::stop_token{};
     assert(!itStopped.stop_possible());
     assert(!itStopped.stop_requested());
-    isStopped = std::stop_source{};
+    isStopped = josuttis::stop_source{};
     assert(isStopped.stop_possible());
     assert(!isStopped.stop_requested());
 
@@ -220,21 +220,21 @@ void testStopTokenAPI()
     assert(!itStopped.stop_possible());
     assert(!itNotValid.stop_possible());
     assert(!itNotValid.stop_requested());
-    std::stop_token itnew = std::move(itNotValid);
+    josuttis::stop_token itnew = std::move(itNotValid);
     assert(!itNotValid.stop_possible());
 
     std::swap(isStopped, isNotValid);
     assert(!isStopped.stop_possible());
     assert(isNotValid.stop_possible());
     assert(!isNotValid.stop_requested());
-    std::stop_source isnew = std::move(isNotValid);
+    josuttis::stop_source isnew = std::move(isNotValid);
     assert(!isNotValid.stop_possible());
   }
 
   // shared ownership semantics:
-  std::stop_source is;
-  std::stop_token it1{is.get_token()};
-  std::stop_token it2{it1};
+  josuttis::stop_source is;
+  josuttis::stop_token it1{is.get_token()};
+  josuttis::stop_token it2{it1};
   assert(is.stop_possible() && !is.stop_requested());
   assert(it1.stop_possible() && !it1.stop_requested());
   assert(it2.stop_possible() && !it2.stop_requested());
@@ -245,22 +245,22 @@ void testStopTokenAPI()
 
   // == and !=:
   {
-    std::stop_source isNotValid1;
-    std::stop_source isNotValid2;
-    std::stop_source isNotStopped1{std::move(isNotValid1)};
-    std::stop_source isNotStopped2{isNotStopped1};
-    std::stop_source isStopped1{std::move(isNotValid2)};
-    std::stop_source isStopped2{isStopped1};
+    josuttis::stop_source isNotValid1;
+    josuttis::stop_source isNotValid2;
+    josuttis::stop_source isNotStopped1{std::move(isNotValid1)};
+    josuttis::stop_source isNotStopped2{isNotStopped1};
+    josuttis::stop_source isStopped1{std::move(isNotValid2)};
+    josuttis::stop_source isStopped2{isStopped1};
     isStopped1.request_stop();
-    std::stop_token itNotValid1{isNotValid1.get_token()};
-    std::stop_token itNotValid2{isNotValid2.get_token()};
-    std::stop_token itNotValid3;
-    std::stop_token itNotStopped1{isNotStopped1.get_token()};
-    std::stop_token itNotStopped2{isNotStopped2.get_token()};
-    std::stop_token itNotStopped3{itNotStopped1};
-    std::stop_token itStopped1{isStopped1.get_token()};
-    std::stop_token itStopped2{isStopped2.get_token()};
-    std::stop_token itStopped3{itStopped2};
+    josuttis::stop_token itNotValid1{isNotValid1.get_token()};
+    josuttis::stop_token itNotValid2{isNotValid2.get_token()};
+    josuttis::stop_token itNotValid3;
+    josuttis::stop_token itNotStopped1{isNotStopped1.get_token()};
+    josuttis::stop_token itNotStopped2{isNotStopped2.get_token()};
+    josuttis::stop_token itNotStopped3{itNotStopped1};
+    josuttis::stop_token itStopped1{isStopped1.get_token()};
+    josuttis::stop_token itStopped2{isStopped2.get_token()};
+    josuttis::stop_token itStopped3{itStopped2};
 
     assert(isNotValid1 == isNotValid2);
     assert(isNotStopped1 == isNotStopped2);
@@ -306,11 +306,11 @@ void testSToken(D dur)
   try {
 
     std::cout << "---- default constructor\n";
-    std::stop_token it0;    // should not allocate anything
+    josuttis::stop_token it0;    // should not allocate anything
 
     std::cout << "---- create interruptor and interruptee\n";
-    std::stop_source interruptor;
-    std::stop_token interruptee{interruptor.get_token()};
+    josuttis::stop_source interruptor;
+    josuttis::stop_token interruptee{interruptor.get_token()};
     ++okSteps; sleep(dur);  // 1
     assert(!interruptor.stop_requested());
     assert(!interruptee.stop_requested());
@@ -328,7 +328,7 @@ void testSToken(D dur)
     assert(interruptee.stop_requested());
 
     std::cout << "---- simulate reset\n";
-    interruptor = std::stop_source{};
+    interruptor = josuttis::stop_source{};
     interruptee = interruptor.get_token();
     ++okSteps; sleep(dur);  // 4
     assert(!interruptor.stop_requested());

@@ -12,8 +12,8 @@
 using namespace::std::literals;
 
 // helper to call iwait() and check some assertions
-void cvIWait (std::stop_token sToken, int id,
-              bool& ready, std::mutex& readyMutex, std::condition_variable_any2& readyCV,
+void cvIWait (josuttis::stop_token sToken, int id,
+              bool& ready, std::mutex& readyMutex, josuttis::condition_variable_any2& readyCV,
               bool notifyCalled) {
   std::ostringstream strm;
   strm <<"\ncvIWait(" << std::to_string(id) << ") called in thread "
@@ -71,10 +71,10 @@ void testStdCV(bool callNotify)
 
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   
   {
-    std::jthread t1([&ready, &readyMutex, &readyCV, callNotify] (std::stop_token it) {
+    josuttis::jthread t1([&ready, &readyMutex, &readyCV, callNotify] (josuttis::stop_token it) {
                       {
                         std::unique_lock lg{readyMutex};
                         while (!it.stop_requested() && !ready) {
@@ -114,10 +114,10 @@ void testCVPred(bool callNotify)
 
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   
   {
-    std::jthread t1([&ready, &readyMutex, &readyCV, callNotify] (std::stop_token st) {
+    josuttis::jthread t1([&ready, &readyMutex, &readyCV, callNotify] (josuttis::stop_token st) {
                       try {
                         std::unique_lock lg{readyMutex};
                         readyCV.wait(lg,
@@ -169,9 +169,9 @@ void testCVStdThreadNoPred(bool callNotify)
 
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   
-  std::stop_source is;
+  josuttis::stop_source is;
   {
     std::thread t1([&ready, &readyMutex, &readyCV, st=is.get_token(), callNotify] {
                       {
@@ -220,9 +220,9 @@ void testCVStdThreadPred(bool callNotify)
 
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   
-  std::stop_source is;
+  josuttis::stop_source is;
   {
     std::thread t1([&ready, &readyMutex, &readyCV, st=is.get_token(), callNotify] {
                       bool ret;
@@ -274,9 +274,9 @@ void testMinimalWait(int sec)
   try {
     bool ready = false;
     std::mutex readyMutex;
-    std::condition_variable_any2 readyCV;
+    josuttis::condition_variable_any2 readyCV;
     {
-      std::jthread t1([&ready, &readyMutex, &readyCV, dur] (std::stop_token st) {
+      josuttis::jthread t1([&ready, &readyMutex, &readyCV, dur] (josuttis::stop_token st) {
                         try {
                           std::cout << "\n- start t1" << std::endl;
                           auto t0 = std::chrono::steady_clock::now();
@@ -323,9 +323,9 @@ void testMinimalWaitFor(int sec1, int sec2)
   try {
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   {
-    std::jthread t1([&ready, &readyMutex, &readyCV, durInt, durWait] (std::stop_token st) {
+    josuttis::jthread t1([&ready, &readyMutex, &readyCV, durInt, durWait] (josuttis::stop_token st) {
                       try {
                       std::cout << "\n- start t1" << std::endl;
                       auto t0 = std::chrono::steady_clock::now();
@@ -376,10 +376,10 @@ void testTimedCV(bool callNotify, bool callInterrupt, Dur dur)
 
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   
   {
-    std::jthread t1([&ready, &readyMutex, &readyCV, callNotify, dur] (std::stop_token st) {
+    josuttis::jthread t1([&ready, &readyMutex, &readyCV, callNotify, dur] (josuttis::stop_token st) {
                       std::cout << "\n- start t1" << std::endl;
                       auto t0 = std::chrono::steady_clock::now();
                       int timesDone{0};
@@ -458,12 +458,12 @@ void testTimedIWait(bool callNotify, bool callInterrupt, Dur dur)
 
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   
   enum class State { loop, ready, interrupted };
   State t1Feedback{State::loop};
   {
-    std::jthread t1([&ready, &readyMutex, &readyCV, callNotify, dur, &t1Feedback] (std::stop_token st) {
+    josuttis::jthread t1([&ready, &readyMutex, &readyCV, callNotify, dur, &t1Feedback] (josuttis::stop_token st) {
                       std::cout << "\n- start t1" << std::endl;
                       auto t0 = std::chrono::steady_clock::now();
                       int timesDone{0};
@@ -576,14 +576,14 @@ void testManyCV(bool callNotify, bool callInterrupt)
     // thread t0 with CV:
     bool ready = false;
     std::mutex readyMutex;
-    std::condition_variable_any2 readyCV;
+    josuttis::condition_variable_any2 readyCV;
 
     std::array<bool,numExtraCV> arrReady{};  // don't forget to initialize with {} here !!!
     std::array<std::mutex,numExtraCV> arrReadyMutex{};
-    std::array<std::condition_variable_any2,numExtraCV> arrReadyCV{};
-    std::vector<std::jthread> vThreadsDeferred;
+    std::array<josuttis::condition_variable_any2,numExtraCV> arrReadyCV{};
+    std::vector<josuttis::jthread> vThreadsDeferred;
 
-    std::jthread t0(cvIWait, 0,
+    josuttis::jthread t0(cvIWait, 0,
                              std::ref(ready), std::ref(readyMutex), std::ref(readyCV),
                              callNotify);
     {  
@@ -593,10 +593,10 @@ void testManyCV(bool callNotify, bool callInterrupt)
       // starts thread concurrently calling request_stop() for the same token:
       std::cout << "\n- loop to start " << numExtraCV << " threads sharing the token and waiting concurently" << std::endl;
 
-      std::vector<std::jthread> vThreads;
+      std::vector<josuttis::jthread> vThreads;
       for (int idx = 0; idx < numExtraCV; ++idx) {
         std::this_thread::sleep_for(0.1ms);
-        std::jthread t([idx, t0stoken=t0ssource.get_token(), &arrReady, &arrReadyMutex, &arrReadyCV, callNotify] {
+        josuttis::jthread t([idx, t0stoken=t0ssource.get_token(), &arrReady, &arrReadyMutex, &arrReadyCV, callNotify] {
                          // use interrupt token of t0 instead
                          // NOTE: disables signaling interrupts directly to the thread
                          cvIWait(t0stoken, idx+1,

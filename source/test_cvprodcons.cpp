@@ -24,9 +24,9 @@ void exampleProducerConsumer(double prodSec, double consSec, bool interrupt)
 
   std::vector<int> items;
   std::mutex itemsMx;
-  std::condition_variable_any2 itemsCV;
-  std::stop_source ssource;
-  std::stop_token stoken{ssource.get_token()};
+  josuttis::condition_variable_any2 itemsCV;
+  josuttis::stop_source ssource;
+  josuttis::stop_token stoken{ssource.get_token()};
   constexpr size_t maxQueueSize = 100;
 
   std::thread producer{

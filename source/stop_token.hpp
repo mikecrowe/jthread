@@ -13,7 +13,7 @@
 #include <immintrin.h>
 #endif
 
-namespace std {
+namespace josuttis {
 inline void __spin_yield() noexcept {
   // TODO: Platform-specific code here
 #if defined(__x86_64__) || defined(_M_X64)
@@ -312,7 +312,7 @@ class stop_source;
 template <typename _Callback>
 class stop_callback;
 
-// std::nostopstate
+// josuttis::nostopstate
 // - to initialize a stop_source without shared stop state
 struct nostopstate_t { explicit nostopstate_t() = default; };
 inline constexpr nostopstate_t nostopstate{};

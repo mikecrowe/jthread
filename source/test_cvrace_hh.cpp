@@ -54,13 +54,13 @@ using namespace::std::literals;
 //  with an internal mutex that checks for unlock-after-destruction.
 //  And the problem with that is now you no no longer have a std::mutex to put into your internal std::condition_variable...
 //
-//  _Maybe_ you could test it by making your internal std::condition_variable a std::condition_variable_any,
+//  _Maybe_ you could test it by making your internal std::condition_variable a josuttis::condition_variable_any2,
 //  then you could put a debugging mutex into it.
 //  But I'm not sure, because this is getting pretty weird and I have not actually tried this.
 //------------------------------------------------------
 
 #ifndef ORIG_CVANY_RACE_TEST
-std::condition_variable_any2* cv = nullptr;
+josuttis::condition_variable_any2* cv = nullptr;
 std::mutex m;
 bool f_ready = false;
 bool g_ready = false;
@@ -90,9 +90,9 @@ void testCVAnyMutex()
     // Writing over the deleted memory is undefined behaviour. In particular,
     // it can destroy the heap data structure, and cause other problems.
     // If you replace new/delete with malloc and free, then it's OK
-    //cv = new std::condition_variable_any2;
-    void* raw=malloc(sizeof(std::condition_variable_any2));
-    cv = new(raw) std::condition_variable_any2;
+    //cv = new josuttis::condition_variable_any2;
+    void* raw=malloc(sizeof(josuttis::condition_variable_any2));
+    cv = new(raw) josuttis::condition_variable_any2;
     std::thread th2(g);
     m.lock();
     while (!g_ready)
@@ -116,9 +116,9 @@ void testCVAnyMutex()
   // Writing over the deleted memory is undefined behaviour. In particular,
   // it can destroy the heap data structure, and cause other problems.
   // If you replace new/delete with malloc and free, then it's OK
-  //std::condition_variable_any2* cv = new std::condition_variable_any2;
-  void* raw=malloc(sizeof(std::condition_variable_any2));
-  std::condition_variable_any2* cv = new(raw) std::condition_variable_any2;
+  //josuttis::condition_variable_any2* cv = new josuttis::condition_variable_any2;
+  void* raw=malloc(sizeof(josuttis::condition_variable_any2));
+  josuttis::condition_variable_any2* cv = new(raw) josuttis::condition_variable_any2;
   std::mutex m;
   bool f_ready = false;
   bool g_ready = false;

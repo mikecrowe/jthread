@@ -11,8 +11,8 @@
 #include <condition_variable>
 #include <iostream>
 
-namespace std {
-
+namespace josuttis {
+    using cv_status = std::cv_status;
 
 //***************************************** 
 //* class condition_variable_any2
@@ -100,7 +100,7 @@ class condition_variable_any2
 
     template<class Lockable, class Clock, class Duration>
      cv_status wait_until(Lockable& lock,
-                          const chrono::time_point<Clock, Duration>& abs_time) {
+                          const std::chrono::time_point<Clock, Duration>& abs_time) {
         auto local_internals=internals;
         std::unique_lock<std::mutex> first_internal_lock(local_internals->m);
         unlock_guard<Lockable> unlocker(lock);
@@ -110,7 +110,7 @@ class condition_variable_any2
 
     template<class Lockable,class Clock, class Duration, class Predicate>
     bool wait_until(Lockable& lock,
-                    const chrono::time_point<Clock, Duration>& abs_time,
+                    const std::chrono::time_point<Clock, Duration>& abs_time,
                     Predicate pred) {
         // have to manually implement the loop so that the user-provided lock is reacquired before calling pred().
         // (otherwise the test_cvrace_pred test case fails)
@@ -134,13 +134,13 @@ class condition_variable_any2
 
     template<class Lockable,class Rep, class Period>
     cv_status wait_for(Lockable& lock,
-                       const chrono::duration<Rep, Period>& rel_time) {
+                       const std::chrono::duration<Rep, Period>& rel_time) {
         return wait_until(lock, std::chrono::steady_clock::now() + rel_time);
     }
 
     template<class Lockable,class Rep, class Period, class Predicate>
     bool wait_for(Lockable& lock,
-                  const chrono::duration<Rep, Period>& rel_time,
+                  const std::chrono::duration<Rep, Period>& rel_time,
                   Predicate pred) {
         return wait_until(lock, std::chrono::steady_clock::now() + rel_time, std::move(pred));
     }
@@ -165,7 +165,7 @@ class condition_variable_any2
     template <class Lockable, class Clock, class Duration, class Predicate>
       bool wait_until(Lockable& lock,
                       stop_token stoken,
-                      const chrono::time_point<Clock, Duration>& abs_time,
+                      const std::chrono::time_point<Clock, Duration>& abs_time,
                       Predicate pred);
     // return:
     // - true if pred() yields true
@@ -173,7 +173,7 @@ class condition_variable_any2
     template <class Lockable, class Rep, class Period, class Predicate>
       bool wait_for(Lockable& lock,
                     stop_token stoken,
-                    const chrono::duration<Rep, Period>& rel_time,
+                    const std::chrono::duration<Rep, Period>& rel_time,
                     Predicate pred);
 
   //***************************************** 
@@ -245,7 +245,7 @@ inline bool condition_variable_any2::wait(Lockable& lock,
 template <class Lockable, class Clock, class Duration, class Predicate>
 inline bool condition_variable_any2::wait_until(Lockable& lock,
                                                 stop_token stoken,
-                                                const chrono::time_point<Clock, Duration>& abs_time,
+                                                const std::chrono::time_point<Clock, Duration>& abs_time,
                                                 Predicate pred)
 {
     if (stoken.stop_requested()) {
@@ -283,7 +283,7 @@ inline bool condition_variable_any2::wait_until(Lockable& lock,
 template <class Lockable,class Rep, class Period, class Predicate>
 inline bool condition_variable_any2::wait_for(Lockable& lock,
                                               stop_token stoken,
-                                              const chrono::duration<Rep, Period>& rel_time,
+                                              const std::chrono::duration<Rep, Period>& rel_time,
                                               Predicate pred)
 {
   auto abs_time = std::chrono::steady_clock::now() + rel_time;

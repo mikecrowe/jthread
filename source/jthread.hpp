@@ -11,7 +11,7 @@
 #include <functional>  // for invoke()
 #include <iostream>    // for debugging output
 
-namespace std {
+namespace josuttis {
 
 //***************************************** 
 //* class jthread
@@ -24,7 +24,7 @@ class jthread
     //* standardized API:
     //***************************************** 
     // - cover full API of std::thread
-    //   to be able to switch from std::thread to std::jthread
+    //   to be able to switch from std::thread to josuttis::jthread
 
     // types are those from std::thread:
     using id = ::std::thread::id;

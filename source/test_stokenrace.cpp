@@ -16,12 +16,12 @@ void testCallbackRegister()
   std::cout << "\n============= testCallbackRegister()\n";
 
   // create stop_source
-  std::stop_source ssrc;
+  josuttis::stop_source ssrc;
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
 
   // create stop_token from stop_source
-  std::stop_token stok{ssrc.get_token()};
+  josuttis::stop_token stok{ssrc.get_token()};
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
   assert(stok.stop_possible());
@@ -31,13 +31,13 @@ void testCallbackRegister()
   bool cb1called{false};
   bool cb2called{false};
   std::cout << "register cb1\n";
-  std::stop_callback cb1{stok, 
+  josuttis::stop_callback cb1{stok, 
                          [&] {
                            std::cout << "cb1 called\n";
                            cb1called = true;
                            // register another callback
                            std::cout << "register cb2\n";
-                           std::stop_callback cb2{stok, 
+                           josuttis::stop_callback cb2{stok, 
                                                   [&] {
                                                     std::cout << "cb2 called\n";
                                                     cb2called = true;
@@ -74,12 +74,12 @@ void testCallbackUnregister()
   std::cout << "\n============= testCallbackUnregister()\n";
 
   // create stop_source
-  std::stop_source ssrc;
+  josuttis::stop_source ssrc;
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
 
   // create stop_token from stop_source
-  std::stop_token stok{ssrc.get_token()};
+  josuttis::stop_token stok{ssrc.get_token()};
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
   assert(stok.stop_possible());
@@ -87,7 +87,7 @@ void testCallbackUnregister()
 
   // register callback that unregisters itself
   bool cb1called{false};
-  std::optional<std::stop_callback<std::function<void()>>> cb;
+  std::optional<josuttis::stop_callback<std::function<void()>>> cb;
   cb.emplace(stok,
              [&] {
                 cb1called = true;
@@ -116,10 +116,10 @@ void testCallbackUnregister()
 //------------------------------------------------------
 
 struct RegUnregCB {
-  std::optional<std::stop_callback<std::function<void()>>> cb{};
+  std::optional<josuttis::stop_callback<std::function<void()>>> cb{};
   bool called{false};
 
-  void reg(std::stop_token& stok) {
+  void reg(josuttis::stop_token& stok) {
     cb.emplace(stok,
                [&] {
                  called = true;
@@ -136,13 +136,13 @@ void testCallbackConcUnregister()
   std::cout << "\n============= testCallbackConcUnregister()\n";
 
   // create stop_source and stop_token:
-  std::stop_source ssrc;
-  std::stop_token stok{ssrc.get_token()};
+  josuttis::stop_source ssrc;
+  josuttis::stop_token stok{ssrc.get_token()};
 
   std::atomic<bool> cb1called{false};
   std::atomic<bool> cb1done{false};
   std::atomic<bool> cb1end{false};
-  std::optional<std::stop_callback<std::function<void()>>> optCB;
+  std::optional<josuttis::stop_callback<std::function<void()>>> optCB;
   auto cb1 = [&]{
               std::cout << "start cb1()" << std::endl;
               cb1called = true;   
@@ -202,13 +202,13 @@ void testCallbackConcUnregisterOtherThread()
   std::cout << "\n============= testCallbackConcUnregisterOtherThread()\n";
 
   // create stop_source and stop_token:
-  std::stop_source ssrc;
-  std::stop_token stok{ssrc.get_token()};
+  josuttis::stop_source ssrc;
+  josuttis::stop_token stok{ssrc.get_token()};
 
   std::atomic<bool> cb1called{false};
   std::atomic<bool> cb1done{false};
   std::atomic<bool> cb1end{false};
-  std::optional<std::stop_callback<std::function<void()>>> optCB;
+  std::optional<josuttis::stop_callback<std::function<void()>>> optCB;
   auto cb1 = [&]{
               std::cout << "start cb1()" << std::endl;
               cb1called = true;   
@@ -267,12 +267,12 @@ void testCallbackThrow()
   std::cout << "\n============= testCallbackThrow()\n";
 
   // create stop_source
-  std::stop_source ssrc;
+  josuttis::stop_source ssrc;
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
 
   // create stop_token from stop_source
-  std::stop_token stok{ssrc.get_token()};
+  josuttis::stop_token stok{ssrc.get_token()};
   assert(ssrc.stop_possible());
   assert(!ssrc.stop_requested());
   assert(stok.stop_possible());
@@ -281,7 +281,7 @@ void testCallbackThrow()
   // register callback
   bool cb1called{false};
   bool cb2called{false};
-  std::stop_callback cb1{stok, 
+  josuttis::stop_callback cb1{stok, 
                          [&] {
                            cb1called = true;
                            // throw

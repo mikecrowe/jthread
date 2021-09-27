@@ -21,7 +21,7 @@ void testCVDeadlock()
 
   bool ready = false;
   std::mutex readyMutex;
-  std::condition_variable_any2 readyCV;
+  josuttis::condition_variable_any2 readyCV;
   
 // T1:
 //  given cv1 with cvMx1
@@ -32,7 +32,7 @@ void testCVDeadlock()
 //  - block and try to notify cv1
   
   {
-    std::jthread t1([&ready, &readyMutex, &readyCV] (std::stop_token st) {
+    josuttis::jthread t1([&ready, &readyMutex, &readyCV] (josuttis::stop_token st) {
                       std::cout << "\n" <<std::this_thread::get_id()<<": t1: lock "<<&readyMutex << std::endl;
                       std::unique_lock<std::mutex> lg{readyMutex};
                       std::cout << "\n" <<std::this_thread::get_id()<<": t1: wait" << std::endl;
@@ -50,7 +50,7 @@ void testCVDeadlock()
     auto t1StopSource = t1.get_stop_source();
 
     std::this_thread::sleep_for(1s);
-    std::jthread t2([&ready, &readyMutex, &readyCV, &t1StopSource] (std::stop_token /*t2_stop_token_not_used*/) {
+    josuttis::jthread t2([&ready, &readyMutex, &readyCV, &t1StopSource] (josuttis::stop_token /*t2_stop_token_not_used*/) {
                         std::cout << "\n" <<std::this_thread::get_id()<<": t2: lock " <<&readyMutex << std::endl;
                       std::unique_lock<std::mutex> lg{readyMutex};
                       std::cout << "\n" <<std::this_thread::get_id()<<": t2: signal stop" << std::endl;
