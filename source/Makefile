@@ -1,4 +1,4 @@
-include Makefile.h
+CXX17 := c++ -std=c++17 -pthread
 
 default: all
 all:: test_stoken test_stokencb test_stokenrace test_stopcb test_jthread1 test_jthread2
