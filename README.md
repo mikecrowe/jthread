@@ -1,3 +1,18 @@
+# jthread in josuttis namespace
+
+The [upstream version of this library](https://github.com/josuttis/jthread)
+was designed to be imported into an existing standard library. This means
+that it uses `namespace std`. This is dangerous if you want to make use of
+the library in your project because your compiler is too old to support
+C++20 and you upgrade your compiler to a version that does have native
+support for the features. This version moves everything into the `josuttis`
+namespace to increase safety.
+
+This version also contains a Makefile that works on Linux at least and
+cherry picks [a pending fix](https://github.com/josuttis/jthread/pull/43).
+
+The original README now follows.
+
 # jthread
 C++ class for a joining and cooperative interruptible thread (std::jthread) with stop_token helper-
 - Reference implementation
